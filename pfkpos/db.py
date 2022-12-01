@@ -1,22 +1,24 @@
+from typing import Dict, Any
 from datetime import timedelta
-from couchbase.auth import PasswordAuthenticator
-from couchbase.cluster import Cluster
-from couchbase.options import (ClusterOptions, ClusterTimeoutOptions, QueryOptions)
+from couchbase.auth import PasswordAuthenticator # type: ignore
+from couchbase.cluster import Cluster # type: ignore
+from couchbase.options import (ClusterOptions, ClusterTimeoutOptions, QueryOptions) # type: ignore
 
-username = "Administrator"
-password = "fall vine edit goof bode fir"
-bucket_name = "RFKPOS"
+class DB:
+    def __init__(self, config: Dict[str, Any]):
+        username = config['db']['username']
+        password = config['db']['password']
+        server = config['db']['url']
+        self.auth = PasswordAuthenticator(username, password)
+        self.cluster = Cluster(server, ClusterOptions(self.auth))
+        self.cluster.wait_until_ready(timedelta(seconds=5))
+        
+        self.pfkpos = self.cluster.bucket("RFKPOS")
+        self.inventory = self.pfkpos.scope("Inventory")
+        self.system = self.inventory.collection("System")
+        self.transactions = self.inventory.collection("Transactions")
 
-auth = PasswordAuthenticator(username, password)
-cluster = Cluster('couchbase://localhost', ClusterOptions(auth))
-cluster.wait_until_ready(timedelta(seconds=5))
-
-rfkpos = cluster.bucket("RFKPOS")
-inventory = rkfpos.scope("Inventory")
-system = inventory.collection("System")
-transactions = inventory.collection("Transactions")
-
-def next_transaction_id():
-    tid = system.increment('nextTransactionID').get('content')
-    return f't{tid:020}'
+    def next_transaction_id(self):
+        tid = self.system.increment('nextTransactionID').get('content')
+        return f't{tid:020}'
 

@@ -12,4 +12,5 @@ setup(name='pfkpos',
       author = 'Oleksandr Kozachuk',
       author_email = 'ddeus.lp@mailnull.com',
       license = license,
-      packages = find_packages(exclude = ('tests', 'docs')))
+      packages = find_packages(exclude = ('tests', 'docs')),
+      entry_points = {'console_scripts': ['pfkpos = pfkpos.__main__:main']})
